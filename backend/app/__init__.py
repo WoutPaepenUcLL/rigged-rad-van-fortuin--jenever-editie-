@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
+from sqlalchemy import text
 from .extensions import db, socketio
 from .utils import init_default_wheel_items
 from .routes import bp
@@ -28,8 +29,11 @@ def create_app():
 
     # Create tables and initialize default wheel items
     with app.app_context():
+        db.session.execute(text("DROP TABLE wheel_items;"))
+        db.session.commit()
         db.create_all()
         init_default_wheel_items(db)
+
 
     app.register_blueprint(bp)
 

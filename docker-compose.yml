@@ -1,43 +1,41 @@
 services:
+
+  # frontend-admin:
+  #   build:
+  #     context: ./frontend/admin-dashboard
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3001:80"
+  #   depends_on:
+  #     - backend
+
+  # database:
+  #   image: postgres:13
+  #   environment:
+  #     - POSTGRES_DB=database
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_HOST_AUTH_METHOD=trust
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   expose:
+  #     - "5433"
+  #   ports:
+  #     - "5432:5432"  # Still mapping to 5433 on the host, which is fine
+  #   restart: always
+
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: woutpaepenucll/backend-kerst:latest
+      
     ports:
       - "8000:8000"
-    depends_on:
-      - database
+  
     environment:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_PORT=5433
-      - DB_NAME=database
+      - DB_PORT=5432
+      - DB_NAME=postgres
       - SECRET_KEY=your_secret_key
-      - DB_HOST=database
-
-  frontend-admin:
-    build:
-      context: ./frontend/admin-dashboard
-      dockerfile: Dockerfile
-    ports:
-      - "3001:80"
-    depends_on:
-      - backend
-
-  database:
-    image: postgres:13
-    environment:
-      - POSTGRES_DB=database
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_HOST_AUTH_METHOD=trust
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    expose:
-      - "5433"
-    ports:
-      - "5433:5432"  # Still mapping to 5433 on the host, which is fine
-    restart: always
-
+      - DB_HOST=localhost
 volumes:
   postgres_data:

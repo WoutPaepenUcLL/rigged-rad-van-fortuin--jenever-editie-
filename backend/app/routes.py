@@ -4,12 +4,14 @@ from sqlalchemy.sql import text
 from datetime import datetime, timedelta
 from .models import db, WheelItem, SpinLog, DrinkCounter
 import random
+import concurrent.futures
 from .extensions import socketio
 
 bp = Blueprint('api', __name__)
 
 @bp.route('/wheel/spin', methods=['POST'])
 def spin_wheel():
+    # Get all wheel items from the database
     wheel_items = WheelItem.query.all()
 
     if not wheel_items:
@@ -17,6 +19,7 @@ def spin_wheel():
 
     result = random.choices(
         [item.name for item in wheel_items],
+        # Use the chance attribute as weight for random selection
         weights=[item.chance for item in wheel_items]
     )[0]
 
@@ -35,7 +38,7 @@ def update_wheel_configuration():
     WheelItem.query.delete()
 
     for item_data in data['items']:
-        wheel_item = WheelItem(name=item_data['name'], chance=item_data['chance'])
+        wheel_item = WheelItem(name=item_data['name'], chance=item_data['chance'], color=item_data['color'])
         db.session.add(wheel_item)
 
     db.session.commit()
@@ -44,7 +47,7 @@ def update_wheel_configuration():
 @bp.route('/admin/wheel-config', methods=['GET'])
 def get_wheel_configuration():
     wheel_items = WheelItem.query.all()
-    items = [{"name": item.name, "chance": item.chance} for item in wheel_items]
+    items = [{"name": item.name, "chance": item.chance, "color": item.color} for item in wheel_items]
     return jsonify({"items": items})
 
 @bp.route('/admin/statistics', methods=['GET'])
